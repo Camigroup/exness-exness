@@ -339,3 +339,35 @@ try {
 
 
 });
+
+// =========================
+// KEEP-ALIVE PING (random 8-12 minutes)
+// =========================
+
+const SELF_URL = process.env.RENDER_EXTERNAL_URL;
+
+function scheduleSelfPing() {
+
+    const delay = (8 + Math.random() * 4) * 60 * 1000;
+
+    setTimeout(async () => {
+
+        try {
+            await axios.get(SELF_URL, {
+                validateStatus: () => true // any response counts, even a 404
+            });
+            console.log("Keep-alive ping OK");
+        } catch (err) {
+            console.log("Keep-alive ping failed:", err.message);
+        }
+
+        scheduleSelfPing();
+
+    }, delay);
+}
+
+if (SELF_URL) {
+    scheduleSelfPing();
+} else {
+    console.log("RENDER_EXTERNAL_URL not set, keep-alive ping disabled");
+}
